@@ -1,0 +1,20 @@
+{
+  "name": "talkboard-server",
+  "version": "1.0.0",
+  "description": "Mobile-friendly community forum",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1",
+    "jimp": "^1.6.1",
+    "multer": "^2.1.1",
+    "node-sql-parser": "^5.4.0",
+    "sql.js": "^1.14.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
