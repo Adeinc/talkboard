@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1729">
+<title>TalkBoard — Community Development, Sport & History</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root, [data-theme="light"]{
+    /* surfaces */
+    --bg:#f1f2f6;--card:#ffffff;--line:#e3e5ec;--line-soft:#edeef2;
+    /* text */
+    --ink:#0c0e16;--muted:#5b6170;--faint:#8b909e;
+    /* brand + accents — punchy, modern */
+    --brand:#5b21e6;--brand-dark:#4a18c4;--brand-soft:#efe9fe;
+    --teal:#0891b2;--green:#15a34a;--amber:#ea580c;--rose:#e11d48;
+    --ink-deep:#0c0e16;--on-deep:#f1f2f6;--pop:#1c1f2e;
+    /* effects */
+    --shadow-sm:0 1px 2px rgba(12,14,22,.07),0 1px 3px rgba(12,14,22,.06);
+    --shadow-md:0 6px 16px rgba(12,14,22,.10);
+    --shadow-lg:0 14px 38px rgba(12,14,22,.18);
+    --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:22px;
+    --safe-b:env(safe-area-inset-bottom,0px);
+  }
+  [data-theme="dark"]{
+    --bg:#0c0e16;--card:#171a26;--line:#2a2e3e;--line-soft:#222634;
+    --ink:#f1f2f6;--muted:#9aa0b0;--faint:#6b7180;
+    --brand:#8b5cf6;--brand-dark:#7c4ef0;--brand-soft:#241d3d;
+    --teal:#22b8d4;--green:#26b85c;--amber:#f97316;--rose:#fb3a63;
+    --ink-deep:#000000;--on-deep:#f1f2f6;--pop:#272b3d;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+    --shadow-md:0 6px 16px rgba(0,0,0,.45);
+    --shadow-lg:0 14px 38px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;
+    transition:background .25s ease,color .25s ease;
+  }
+  a{color:var(--brand-dark);text-decoration:none}
+  img{max-width:100%}
+  button{font-family:inherit;cursor:pointer}
+  ::selection{background:var(--brand-soft)}
+
+  /* ---- top bar: bold ---- */
+  header.topbar{
+    background:var(--ink-deep);position:sticky;top:0;z-index:30;
+    padding-top:env(safe-area-inset-top,0px);
+  }
+  .topbar-inner{
+    max-width:1000px;margin:0 auto;padding:15px 18px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .brand{display:flex;align-items:center;gap:8px;cursor:pointer;min-width:0}
+  .brand .mark{font-weight:800;font-size:23px;letter-spacing:-.8px;white-space:nowrap;color:var(--on-deep)}
+  .brand .mark span{color:var(--brand)}
+  [data-theme="dark"] .brand .mark span{color:#a78bfa}
+  .brand .tag{font-size:9.5px;color:#7a808f;text-transform:uppercase;letter-spacing:.7px;font-weight:700}
+  .topbar .right{margin-left:auto;display:flex;align-items:center;gap:7px}
+  .userchip{font-size:13px;color:#a78bfa;font-weight:800;max-width:84px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .theme-toggle{
+    width:38px;height:38px;border-radius:999px;border:none;flex-shrink:0;
+    background:rgba(255,255,255,.1);color:var(--on-deep);font-size:16px;
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .15s ease,background .15s ease;
+  }
+  .lang-select{
+    background:rgba(255,255,255,.1);color:var(--on-deep);border:none;
+    border-radius:999px;padding:8px 10px;font-family:inherit;font-size:12px;
+    font-weight:700;flex-shrink:0;cursor:pointer;max-width:96px;
+  }
+  .lang-select option{background:var(--ink-deep);color:var(--on-deep)}
+  .theme-toggle:hover{background:rgba(255,255,255,.18)}
+  .theme-toggle:active{transform:scale(.9) rotate(20deg)}
+  .bell-btn{width:38px;height:38px;border-radius:999px;border:none;flex-shrink:0;background:rgba(255,255,255,.1);color:var(--on-deep);font-size:15px;position:relative;display:flex;align-items:center;justify-content:center;transition:transform .15s ease,background .15s ease}
+  .bell-btn:hover{background:rgba(255,255,255,.18)}
+  .bell-btn:active{transform:scale(.9)}
+  .bell-count{position:absolute;top:2px;right:2px;min-width:16px;height:16px;padding:0 4px;background:var(--rose);color:#fff;font-size:9.5px;font-weight:900;border-radius:999px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink-deep)}
+  .bell-count:empty{display:none}
+  .notif-panel{position:fixed;top:60px;right:10px;width:330px;max-width:calc(100vw - 20px);max-height:70vh;overflow-y:auto;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--shadow-lg);z-index:55}
+  .notif-panel h3{font-size:14px;font-weight:800;padding:13px 15px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .notif-panel h3 button{background:none;border:none;font-size:11.5px;font-weight:700;color:var(--brand-dark)}
+  .notif-item{padding:11px 15px;border-bottom:1px solid var(--line-soft);font-size:13px;cursor:pointer;line-height:1.45}
+  .notif-item:last-child{border-bottom:none}
+  .notif-item:hover{background:var(--bg)}
+  .notif-item.unseen{background:var(--brand-soft)}
+  .notif-item .nt-when{font-size:11px;color:var(--faint);margin-top:3px;font-weight:600}
+  .notif-empty{padding:30px 16px;text-align:center;color:var(--faint);font-size:13px}
+  .acct-grid{display:flex;flex-direction:column;gap:9px;font-size:13.5px}
+  .acct-grid>div{padding:9px 0;border-top:1px solid var(--line-soft)}
+  .acct-k{display:inline-block;min-width:120px;font-weight:700;color:var(--muted)}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:14px;cursor:pointer}
+  .toggle-row input{width:22px;height:22px;flex-shrink:0;accent-color:var(--brand)}
+  .btn{
+    font-size:13px;font-weight:800;border:1px solid transparent;border-radius:999px;
+    padding:9px 16px;background:rgba(255,255,255,.12);color:var(--on-deep);
+    transition:transform .12s ease,background .15s ease,box-shadow .15s ease;
+  }
+  .btn:active{transform:scale(.95)}
+  .btn-rust{background:var(--brand);color:#fff;box-shadow:0 3px 12px rgba(91,33,230,.4)}
+  .btn-rust:hover{background:var(--brand-dark)}
+  .btn-ghost{background:transparent;color:var(--muted);border-color:var(--line)}
+  .btn-ghost:hover{background:var(--bg)}
+  .btn-block{width:100%;padding:14px;font-size:15px;border-radius:var(--r-md)}
+  .btn-sm{padding:7px 13px;font-size:12px}
+  .btn:disabled{opacity:.5}
+
+  /* ---- search ---- */
+  .searchbar{background:var(--ink-deep);padding:0 18px 15px}
+  .searchbar form{max-width:1000px;margin:0 auto;display:flex;background:rgba(255,255,255,.1);border-radius:999px;overflow:hidden}
+  .searchbar input{
+    flex:1;border:none;padding:12px 18px;font-size:14px;font-family:inherit;
+    background:transparent;color:var(--on-deep);min-width:0;
+  }
+  .searchbar input::placeholder{color:#7a808f}
+  .searchbar button{border:none;background:var(--brand);color:#fff;padding:0 22px;font-size:14px;font-weight:800}
+
+  /* ---- section nav ---- */
+  nav.sections{background:var(--card);border-bottom:1px solid var(--line);overflow-x:auto;-webkit-overflow-scrolling:touch}
+  nav.sections::-webkit-scrollbar{display:none}
+  .sections-inner{max-width:1000px;margin:0 auto;display:flex;padding:8px 12px;gap:5px}
+  nav.sections a{
+    padding:9px 16px;font-size:13px;font-weight:800;color:var(--muted);
+    white-space:nowrap;cursor:pointer;border-radius:999px;transition:background .15s ease,color .15s ease;
+  }
+  nav.sections a:hover{background:var(--bg)}
+  nav.sections a.active{color:#fff;background:var(--brand)}
+
+  .notice-strip{background:var(--brand-soft);border-bottom:1px solid var(--line);font-size:12px;color:var(--brand-dark);font-weight:600}
+  .email-banner{max-width:1000px;margin:14px auto -6px;padding:11px 16px;background:#fff7ed;border:1px solid #fde2c2;border-radius:var(--r-md);color:#b45309;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  [data-theme="dark"] .email-banner{background:#2a1f12;border-color:#5a4220;color:#f9a84a}
+  .email-banner button{margin-left:auto;background:var(--brand);color:#fff;border:none;border-radius:999px;padding:6px 13px;font-size:12px;font-weight:700}
+  [data-theme="dark"] .notice-strip{color:#c4b5fd}
+  .notice-inner{max-width:1000px;margin:0 auto;padding:10px 18px}
+
+  main{max-width:1000px;margin:0 auto;padding:22px 16px 100px}
+  .crumbs{font-size:12px;color:var(--faint);margin-bottom:14px;font-weight:700}
+  .crumbs span{cursor:pointer}
+  .crumbs span:hover{color:var(--brand-dark)}
+  .page-head h1{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1.15}
+  .page-head p{color:var(--muted);font-size:14px;margin:5px 0 20px;font-weight:500}
+  .page-head-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+  .page-head-row>div{flex:1;min-width:0}
+  .new-talk-btn{flex-shrink:0;margin-top:4px;font-size:14px;padding:11px 18px}
+
+  /* ---- section cards ---- */
+  .sec-card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
+    box-shadow:var(--shadow-sm);padding:18px;margin-bottom:12px;cursor:pointer;
+    position:relative;overflow:hidden;transition:transform .14s ease,box-shadow .14s ease;
+  }
+  .sec-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent,#ccc)}
+  .sec-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+  .sec-card h3{font-size:16px;font-weight:800;margin-bottom:4px;letter-spacing:-.3px}
+  .sec-card .desc{font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.5}
+  .sec-card .meta{font-size:12px;color:var(--faint);display:flex;gap:14px;flex-wrap:wrap;font-weight:600}
+  .sec-card .meta b{color:var(--ink);font-weight:800}
+
+  .toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+  .toolbar .sel,.toolbar input{
+    font-family:inherit;font-size:13px;padding:9px 12px;border:1px solid var(--line);
+    border-radius:999px;background:var(--card);color:var(--ink);font-weight:600;
+  }
+
+  /* ---- thread cards ---- */
+  .thread-list{display:flex;flex-direction:column;gap:10px}
+  .thread-row{
+    display:flex;gap:13px;padding:15px;cursor:pointer;align-items:flex-start;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+    box-shadow:var(--shadow-sm);transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease;
+  }
+  .thread-row:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:#d8dce5}
+  .thread-row:last-child{border-bottom:none}
+  .thread-row:active{transform:scale(.99)}
+  .votecol{text-align:center;min-width:44px;flex-shrink:0;background:var(--bg);border-radius:var(--r-sm);padding:7px 4px}
+  .votecol .score{font-weight:800;font-size:16px;color:var(--ink)}
+  .votecol .lbl{font-size:9px;color:var(--faint);text-transform:uppercase;letter-spacing:.4px;font-weight:700}
+  .t-thumb{width:60px;height:60px;border-radius:var(--r-sm);object-fit:cover;flex-shrink:0;border:1px solid var(--line);background:#eef0f3}
+  .t-main{flex:1;min-width:0}
+  .t-title{font-size:15px;font-weight:800;line-height:1.35;margin-bottom:4px;letter-spacing:-.3px}
+  .t-prev{font-size:13px;color:var(--muted);margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.5}
+  .t-meta{font-size:11.5px;color:var(--faint);display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-weight:600}
+  .t-meta .author{color:var(--brand-dark);font-weight:700}
+  .pill{font-size:10px;font-weight:800;letter-spacing:.2px;padding:3px 9px;border-radius:999px;color:#fff}
+  .loc-pill{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:#ecfdf5;color:#047857;border:1px solid #c2f0dd}
+  .exp-pill{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:#fff7ed;color:#b45309;border:1px solid #fde2c2}
+  .exp-pill.soon{background:#fff1f3;color:#be123c;border-color:#fbcfd8}
+
+  .empty{padding:46px 22px;text-align:center;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);font-weight:500}
+
+  /* ---- posts ---- */
+  .post{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);margin-bottom:12px;overflow:hidden}
+  .post.op{box-shadow:var(--shadow-md)}
+  .post.op .post-content{border-top:0}
+  .post-head{display:flex;align-items:center;gap:11px;padding:15px 16px 0}
+  .avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;color:#fff;flex-shrink:0;box-shadow:0 2px 6px rgba(15,23,41,.18)}
+  .post-head .pname{font-weight:800;font-size:14px;color:var(--ink)}
+  .post-head .when{font-size:11.5px;color:var(--faint);font-weight:600}
+  .post-content{padding:12px 16px 16px}
+  .post-content .text{font-size:15px;white-space:pre-wrap;word-wrap:break-word;line-height:1.6}
+  .post-photos{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+  .post-photos img{width:calc(50% - 4px);height:150px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--line);cursor:pointer;transition:transform .12s ease}
+  .post-photos img:hover{transform:scale(1.02)}
+  .post-foot{margin-top:13px;padding-top:12px;border-top:1px solid var(--line-soft);display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+  .vbtn{
+    border:1px solid var(--line);background:var(--card);border-radius:999px;
+    padding:8px 13px;font-size:13px;font-weight:700;color:var(--muted);
+    transition:transform .1s ease,background .12s ease,border-color .12s ease;
+  }
+  .vbtn:active{transform:scale(.94)}
+  .vbtn.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .vbtn.down.on{background:var(--ink-deep);border-color:var(--ink-deep);color:#fff}
+  .vcount{font-weight:800;font-size:14px;min-width:22px;text-align:center}
+  .post-exp{margin-left:auto;font-size:11px;color:var(--faint);font-weight:600}
+
+  /* ---- forms ---- */
+  .composer{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:20px;margin-bottom:14px}
+  .composer h3{font-size:16px;font-weight:800;margin-bottom:14px;letter-spacing:-.3px}
+  .field{margin-bottom:15px}
+  .field label{display:block;font-size:12px;font-weight:700;color:var(--ink);margin-bottom:7px}
+  .field .hint{font-weight:500;color:var(--faint);font-size:11.5px}
+  .field input,.field select,.field textarea{
+    width:100%;font-family:inherit;font-size:15px;padding:12px 13px;
+    border:1px solid var(--line);border-radius:var(--r-sm);background:var(--card);color:var(--ink);
+    transition:border-color .12s ease,box-shadow .12s ease;
+  }
+  .field textarea{resize:vertical;min-height:120px;line-height:1.55}
+  .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-soft)}
+  .photo-preview{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+  .photo-preview .thumb{position:relative}
+  .photo-preview img{width:74px;height:74px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--line)}
+  .photo-preview .rm{position:absolute;top:-7px;right:-7px;width:23px;height:23px;border-radius:50%;background:var(--ink-deep);color:#fff;border:2px solid #fff;font-size:13px;line-height:1}
+
+  /* ---- modal ---- */
+  .overlay{position:fixed;inset:0;background:rgba(15,23,41,.5);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;z-index:50;animation:fade .15s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .modal{background:var(--card);border-radius:var(--r-xl) var(--r-xl) 0 0;width:100%;max-width:440px;padding:24px 22px calc(24px + var(--safe-b));animation:slideup .22s cubic-bezier(.2,.8,.2,1)}
+  @keyframes slideup{from{transform:translateY(40px)}to{transform:translateY(0)}}
+  .modal h2{font-size:20px;font-weight:800;margin-bottom:5px;letter-spacing:-.4px}
+  .modal p.sub{font-size:13px;color:var(--muted);margin-bottom:17px;line-height:1.5}
+  @media(min-width:520px){
+    .overlay{align-items:center}
+    .modal{border-radius:var(--r-xl);margin:20px}
+  }
+  .lightbox{position:fixed;inset:0;background:rgba(8,10,18,.94);display:flex;align-items:center;justify-content:center;z-index:80}
+  .lightbox img{max-width:96vw;max-height:90vh;border-radius:var(--r-sm)}
+
+  /* ---- floating new-thread button ---- */
+  .fab{
+    position:fixed;right:18px;bottom:calc(18px + var(--safe-b));z-index:25;
+    background:var(--brand);color:#fff;border:none;border-radius:999px;
+    padding:15px 22px;font-size:15px;font-weight:800;letter-spacing:-.2px;
+    box-shadow:0 8px 24px rgba(59,91,219,.45);transition:transform .12s ease;
+  }
+  .fab:active{transform:scale(.93)}
+
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(82px + var(--safe-b));background:var(--pop);color:#fff;padding:12px 20px;border-radius:999px;font-size:13px;font-weight:600;z-index:90;max-width:90vw;text-align:center;box-shadow:var(--shadow-lg)}
+  .loading{padding:54px;text-align:center;color:var(--faint);font-weight:600}
+  footer{border-top:1px solid var(--line);background:var(--card);padding:24px 18px calc(24px + var(--safe-b));text-align:center;font-size:12px;color:var(--muted);line-height:1.7}
+  footer b{font-weight:800;color:var(--ink)}
+
+  /* moderation */
+  .mod-link{background:none;border:none;font-size:12px;font-weight:700;color:var(--muted);padding:7px 6px}
+  .mod-link:hover{color:var(--brand-dark)}
+  .mod-link.danger{color:var(--rose)}
+  .mod-banner{background:#fff1f3;color:#be123c;font-size:12px;font-weight:700;padding:9px 16px;display:flex;align-items:center;gap:8px}
+  .post.is-removed{opacity:.7}
+  .tier-badge{display:inline-block;font-size:9.5px;font-weight:800;color:#fff;padding:2px 8px;border-radius:999px;vertical-align:middle;letter-spacing:.2px}
+  .vbadge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;color:#fff;font-size:9px;font-weight:900;border-radius:999px;vertical-align:middle;margin-left:3px;box-shadow:0 1px 3px rgba(12,14,22,.3)}
+  .staff-badge{display:inline-block;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:999px;vertical-align:middle;margin-left:3px}
+  .staff-badge.lead{background:var(--brand);color:#fff}
+  .staff-badge.mod{background:var(--brand-soft);color:var(--brand-dark)}
+  [data-theme="dark"] .staff-badge.mod{color:#c4b5fd}
+  .team-list{display:flex;flex-direction:column;gap:8px}
+  .team-row{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--shadow-sm);padding:11px 13px}
+  .role-tag{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;margin-top:2px}
+  .role-tag.super{background:var(--brand);color:#fff}
+  .role-tag.mod{background:var(--brand-soft);color:var(--brand-dark)}
+  [data-theme="dark"] .role-tag.mod{color:#c4b5fd}
+  .report-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:16px;margin-bottom:12px;position:relative;overflow:hidden}
+  .report-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--rose)}
+  .report-card .rc-reason{font-weight:800;font-size:13.5px;color:var(--rose);margin-bottom:3px}
+  .report-card .rc-meta{font-size:11.5px;color:var(--faint);margin-bottom:11px;font-weight:600}
+  .report-card .rc-content{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px;font-size:13px;margin-bottom:12px;line-height:1.55}
+  .report-card .rc-content .rc-author{font-weight:800;color:var(--brand-dark);font-size:12px;margin-bottom:4px}
+  .report-card .rc-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .badge{display:inline-block;background:var(--rose);color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:2px 9px;margin-left:5px}
+
+  @media(min-width:680px){
+    .sec-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    .sec-card{margin-bottom:0}
+    .post-photos img{width:200px}
+    .fab{display:none}
+  }
+
+  /* ---- mobile bottom navigation ---- */
+  .bottom-nav{
+    position:fixed;left:0;right:0;bottom:0;z-index:28;
+    background:var(--card);border-top:1px solid var(--line);
+    display:flex;padding-bottom:var(--safe-b);
+    box-shadow:0 -2px 12px rgba(12,14,22,.08);
+  }
+  .bottom-nav a{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+    padding:8px 0 7px;cursor:pointer;color:var(--faint);position:relative;
+    transition:color .15s ease;
+  }
+  .bottom-nav a.active{color:var(--brand)}
+  .bottom-nav .bn-ico{font-size:19px;line-height:1}
+  .bottom-nav .bn-lbl{font-size:10px;font-weight:700}
+  .bottom-nav .bn-create .bn-ico{
+    background:var(--brand);color:#fff;width:38px;height:30px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;font-size:15px;
+    margin-bottom:1px;box-shadow:0 3px 10px rgba(91,33,230,.4);
+  }
+  .bottom-nav .bn-dot{
+    position:absolute;top:6px;right:calc(50% - 14px);width:8px;height:8px;
+    background:var(--rose);border-radius:50%;border:2px solid var(--card);display:none;
+  }
+  .bottom-nav .bn-dot.on{display:block}
+  @media(min-width:680px){ .bottom-nav{display:none} }
+  @media(max-width:679px){ main{padding-bottom:84px} }
+
+  /* ---- hero welcome strip ---- */
+  .hero{
+    background:linear-gradient(135deg,var(--brand),#7c3aed);
+    color:#fff;border-radius:var(--r-lg);padding:18px 20px;margin-bottom:16px;
+  }
+  .hero h2{font-size:20px;font-weight:800;letter-spacing:-.4px;margin-bottom:3px}
+  .hero p{font-size:13px;opacity:.9}
+  .hero-chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+  .hero-chips a{
+    background:rgba(255,255,255,.16);color:#fff;font-size:12px;font-weight:700;
+    padding:6px 12px;border-radius:999px;cursor:pointer;transition:background .15s ease;
+  }
+  .hero-chips a:hover{background:rgba(255,255,255,.28)}
+
+  /* ---- feed filter tabs ---- */
+  .feed-tabs{
+    display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    margin-bottom:14px;padding-bottom:2px;
+  }
+  .feed-tabs::-webkit-scrollbar{display:none}
+  .feed-tabs a{
+    white-space:nowrap;padding:8px 15px;border-radius:999px;font-size:13px;
+    font-weight:700;cursor:pointer;background:var(--card);border:1px solid var(--line);
+    color:var(--muted);transition:all .15s ease;
+  }
+  .feed-tabs a.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  [data-theme="dark"] .feed-tabs a.active{background:var(--brand);border-color:var(--brand)}
+
+  /* ---- trending strip ---- */
+  .trend-strip{margin:16px 0}
+  .trend-strip h3{font-size:14px;font-weight:800;margin-bottom:9px}
+  .trend-row{display:flex;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+  .trend-row::-webkit-scrollbar{display:none}
+  .trend-card{
+    flex:0 0 200px;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--r-md);box-shadow:var(--shadow-sm);padding:12px 13px;cursor:pointer;
+    transition:transform .12s ease,box-shadow .12s ease;
+  }
+  .trend-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+  .trend-card .tc-title{font-size:13px;font-weight:700;line-height:1.35;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .trend-card .tc-meta{font-size:11px;color:var(--faint);margin-top:6px;font-weight:600}
+
+  /* ---- discussing-now indicator ---- */
+  .live-tag{
+    display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;
+    color:var(--green);
+  }
+  .live-tag .dot{width:6px;height:6px;background:var(--green);border-radius:50%;
+    animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+  /* ---- micro-animations ---- */
+  @keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .thread-row,.sec-card{animation:cardIn .25s ease backwards}
+  .thread-list .thread-row:nth-child(2){animation-delay:.03s}
+  .thread-list .thread-row:nth-child(3){animation-delay:.06s}
+  .thread-list .thread-row:nth-child(4){animation-delay:.09s}
+  .thread-list .thread-row:nth-child(n+5){animation-delay:.12s}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand" onclick="go('home')">
+      <div class="mark">Talk<span>Board</span></div>
+      <div class="tag">Community</div>
+    </div>
+    <div class="right">
+      <select class="lang-select" id="langSelect" onchange="setLang(this.value)" aria-label="Language"></select>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle dark mode">🌙</button>
+      <button class="bell-btn" id="bellBtn" onclick="toggleNotifs()" aria-label="Notifications" style="display:none">🔔<span class="bell-count" id="bellCount"></span></button>
+      <span id="userbox" style="display:flex;align-items:center;gap:7px"></span>
+    </div>
+  </div>
+</header>
+<div class="searchbar">
+  <form onsubmit="doSearch(event)">
+    <input id="searchInput" placeholder="Search threads…">
+    <button type="submit">Go</button>
+  </form>
+</div>
+
+<nav class="sections" id="navStrip"></nav>
+
+<div class="notice-strip">
+  <div class="notice-inner">
+    🕒 <b>Posts auto-delete after 30 days.</b> This keeps the board current and reduces the chance
+    of old comments being dug up or misquoted later. Anyone can still screenshot a post before it expires.
+  </div>
+</div>
+
+<main id="app"><div class="loading">Loading the board…</div></main>
+
+<button class="fab" id="fab" onclick="newThreadClick()" style="display:none">✏️</button>
+
+<nav class="bottom-nav" id="bottomNav">
+  <a onclick="go('home')" data-nav="home"><span class="bn-ico">🏠</span><span class="bn-lbl">Home</span></a>
+  <a onclick="go('explore')" data-nav="explore"><span class="bn-ico">🔍</span><span class="bn-lbl">Explore</span></a>
+  <a onclick="newThreadClick()" data-nav="create" class="bn-create"><span class="bn-ico">✏️</span><span class="bn-lbl">New</span></a>
+  <a onclick="bottomNavInbox()" data-nav="inbox"><span class="bn-ico">🔔</span><span class="bn-lbl">Alerts</span><span class="bn-dot" id="bnDot"></span></a>
+  <a onclick="bottomNavProfile()" data-nav="profile"><span class="bn-ico">👤</span><span class="bn-lbl">Account</span></a>
+</nav>
+
+<footer>
+  <b>TalkBoard</b> — community development, sport &amp; community history.<br>
+  Anyone can read. Sign in to post. All content is removed 30 days after posting.
+</footer>
+
+<script src="/i18n.js"></script>
+<script>
+/* ============================================================
+   TalkBoard frontend — talks to the backend API.
+   Mobile-first single-page app.
+   ============================================================ */
+
+const API = '';  // same origin
+const SECTIONS = [
+  {id:'development',name:'Community Development',accent:'#1f6f6b',local:true,
+   desc:'Trending development around your area — local infrastructure, projects and issues where you live.'},
+  {id:'sport',name:'Sport',accent:'#2f7d32',local:false,
+   desc:'Football, athletics, results, transfers and match-day talk.'},
+  {id:'history',name:'Community History',accent:'#8c3413',local:true,
+   desc:'Local history, old photos, memories and the story of your area.'},
+];
+const SECMAP = Object.fromEntries(SECTIONS.map(s=>[s.id,s]));
+
+let STATE = {
+  token:localStorage.getItem('tb_token')||null,
+  user:null, view:{name:'home'}, threads:[], votes:{},
+  draftPhotos:[], replyPhotos:[], sort:'new', locFilter:'',
+  lang:localStorage.getItem('tb_lang')||'en', notifs:[],
+};
+
+/* ---------- translation ----------
+   t('key') returns the string in the current language, falling
+   back to English if that language hasn't translated the key. */
+function t(key){
+  const s=window.I18N&&window.I18N.STRINGS[key];
+  if(!s)return key;
+  return s[STATE.lang]||s.en||key;
+}
+function setLang(code){
+  STATE.lang=code;
+  localStorage.setItem('tb_lang',code);
+  renderChrome();
+  render();
+}
+
+/* ---------- API helper ---------- */
+async function api(path, opts={}){
+  const headers=opts.headers||{};
+  if(STATE.token) headers['Authorization']='Bearer '+STATE.token;
+  if(opts.json){ headers['Content-Type']='application/json'; opts.body=JSON.stringify(opts.json); delete opts.json; }
+  const r=await fetch(API+path,{...opts,headers});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok){ const e=new Error(data.error||'Request failed'); e.data=data; e.status=r.status; throw e; }
+  return data;
+}
+
+/* ---------- utilities ---------- */
+function esc(s){return(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function ago(ts){
+  const d=Date.now()-ts,m=6e4,h=36e5,day=864e5;
+  if(d<m)return'just now';
+  if(d<h)return Math.floor(d/m)+'m ago';
+  if(d<day)return Math.floor(d/h)+'h ago';
+  if(d<day*30)return Math.floor(d/day)+'d ago';
+  return new Date(ts).toLocaleDateString();
+}
+function expiry(ts){
+  const left=ts+30*864e5-Date.now(),day=864e5,h=36e5;
+  if(left<=0)return{txt:'expired',soon:true};
+  if(left<day)return{txt:'expires in '+Math.max(1,Math.floor(left/h))+'h',soon:true};
+  const d=Math.floor(left/day);
+  return{txt:'expires in '+d+'d',soon:d<=3};
+}
+function avatarColor(n){
+  const c=['#1f6f6b','#b5451b','#2f7d32','#c98a1a','#5a4a8a','#8c3413','#2c6e8c'];
+  let h=0;for(const ch of n)h=(h*31+ch.charCodeAt(0))|0;
+  return c[Math.abs(h)%c.length];
+}
+function score(t){return(t.up||0)-(t.down||0);}
+
+/* render a member's verification badges (verified / local / official) */
+function badgeMarks(badges){
+  if(!badges||!badges.length)return'';
+  return badges.map(b=>
+    `<span class="vbadge" style="background:${b.color}" title="${esc(b.label)} member">${b.mark}</span>`
+  ).join('');
+}
+function toast(msg){
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  document.body.appendChild(t);setTimeout(()=>t.remove(),2600);
+}
+function waitText(ms){const m=Math.ceil(ms/6e4);return m<=1?'about a minute':('about '+m+' minutes');}
+
+/* ---------- init ---------- */
+/* ---------- theme (light / dark) ---------- */
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme',theme);
+  const btn=document.getElementById('themeToggle');
+  if(btn) btn.textContent = theme==='dark' ? '☀️' : '🌙';
+  const meta=document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute('content', theme==='dark' ? '#000000' : '#0c0e16');
+}
+function initTheme(){
+  let t=localStorage.getItem('tb_theme');
+  if(!t){
+    // fall back to the device preference on first visit
+    t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark' : 'light';
+  }
+  applyTheme(t);
+}
+function toggleTheme(){
+  const cur=document.documentElement.getAttribute('data-theme')||'light';
+  const next=cur==='dark'?'light':'dark';
+  localStorage.setItem('tb_theme',next);
+  applyTheme(next);
+}
+
+async function init(){
+  initTheme();
+  if(STATE.token){
+    try{ STATE.user=await api('/api/me'); }
+    catch(e){ STATE.token=null; localStorage.removeItem('tb_token'); }
+  }
+  if(STATE.token){
+    try{ STATE.votes=await api('/api/myvotes'); }catch(e){}
+  }
+  renderChrome();
+  if(STATE.user) startNotifPolling();
+  go('home');
+}
+
+/* ---------- navigation ---------- */
+function go(name,arg){
+  STATE.view={name,arg};STATE.draftPhotos=[];STATE.replyPhotos=[];STATE.locFilter='';
+  window.scrollTo(0,0);
+  renderNav();
+  document.getElementById('fab').style.display=(STATE.user&&name!=='new')?'':'none';
+  render();
+}
+function doSearch(e){
+  e.preventDefault();
+  const q=document.getElementById('searchInput').value.trim();
+  if(!q)return;
+  STATE.view={name:'search',arg:q};window.scrollTo(0,0);render();
+}
+function newThreadClick(secId){
+  if(!STATE.user){ openLogin(); return; }
+  if(!STATE.user.canCreateThreads){
+    toast('New members can reply now — posting unlocks shortly');
+  }
+  go('new',secId);
+}
+
+/* ---- mobile bottom navigation ---- */
+function bottomNavInbox(){
+  if(!STATE.user){ openLogin(); return; }
+  toggleNotifs();
+}
+function bottomNavProfile(){
+  if(!STATE.user){ openLogin(); return; }
+  go('account');
+}
+function syncBottomNav(){
+  const v=STATE.view.name;
+  const map={home:'home',explore:'explore',account:'profile'};
+  const active=map[v]||'';
+  document.querySelectorAll('.bottom-nav a').forEach(a=>{
+    a.classList.toggle('active',a.getAttribute('data-nav')===active);
+  });
+  const dot=document.getElementById('bnDot');
+  if(dot){
+    const c=document.getElementById('bellCount');
+    dot.classList.toggle('on',!!(STATE.user&&c&&c.textContent));
+  }
+}
+
+/* ---------- chrome ---------- */
+function renderChrome(){ renderLangSelect(); renderNav(); renderUser(); }
+function renderLangSelect(){
+  const sel=document.getElementById('langSelect');
+  if(!sel)return;
+  sel.innerHTML=window.I18N.LANGS.map(l=>
+    `<option value="${l.code}"${STATE.lang===l.code?' selected':''}>${l.label}</option>`).join('');
+}
+function renderNav(){
+  const cur=STATE.view.name==='section'?STATE.view.arg:null;
+  document.getElementById('navStrip').innerHTML=
+    `<div class="sections-inner">
+      <a onclick="go('home')" class="${STATE.view.name==='home'?'active':''}">${t('nav.all')}</a>`+
+      SECTIONS.map(s=>`<a onclick="go('section','${s.id}')" class="${cur===s.id?'active':''}">${s.name}</a>`).join('')+
+    `</div>`;
+}
+function renderUser(){
+  const ub=document.getElementById('userbox');
+  const bell=document.getElementById('bellBtn');
+  if(STATE.user){
+    if(bell)bell.style.display='';
+    const adminBtn=STATE.user.isAdmin
+      ?`<button class="btn" style="background:#7c9bff;color:#0f1729" onclick="go('admin')">
+          🛡 Admin${STATE.openReports?' ('+STATE.openReports+')':''}</button>`:'';
+    ub.innerHTML=`${adminBtn}<span class="userchip" onclick="go('account')" style="cursor:pointer">${esc(STATE.user.name)}</span>
+      <button class="btn btn-ghost" onclick="logout()">${t('btn.signout')}</button>`;
+  }else{
+    if(bell)bell.style.display='none';
+    ub.innerHTML=`<button class="btn btn-rust" onclick="openLogin()">${t('btn.signin')}</button>`;
+  }
+}
+
+/* ---------- auth ---------- */
+let AUTHMODE='signin'; // 'signin' or 'signup'
+function openLogin(mode){
+  AUTHMODE=mode||'signin';
+  const ov=document.createElement('div');ov.className='overlay';ov.id='loginOv';
+  ov.innerHTML=authModalHtml();
+  ov.onclick=e=>{if(e.target===ov)closeLogin();};
+  document.body.appendChild(ov);
+  setTimeout(()=>{const n=document.getElementById('lgName');if(n)n.focus();},60);
+}
+function authModalHtml(){
+  const signup=AUTHMODE==='signup';
+  return `<div class="modal">
+    <h2>${signup?'Create your account':'Welcome back'}</h2>
+    <p class="sub">Anyone can read TalkBoard. ${signup
+      ?'Set a display name and password to post.'
+      :'Sign in to start Talks, reply and share photos.'}</p>
+    <div class="field"><label>Display name</label>
+      <input id="lgName" maxlength="20" placeholder="e.g. AdaO" autocomplete="username"></div>
+    ${signup?`<div class="field"><label>Email <span class="hint">(we'll send a confirmation link)</span></label>
+      <input id="lgEmail" type="email" maxlength="120" placeholder="you@example.com" autocomplete="email"></div>`:''}
+    <div class="field"><label>Password <span class="hint">(6+ characters)</span></label>
+      <input id="lgPass" type="password" maxlength="100" placeholder="Your password"
+        autocomplete="${signup?'new-password':'current-password'}"></div>
+    ${signup?`<div class="field"><label>Your city / area <span class="hint">(used for local sections)</span></label>
+      <input id="lgCity" maxlength="40" placeholder="e.g. Dinnington, Sheffield" autocomplete="off"></div>
+    <p class="sub" style="font-size:11.5px;margin-bottom:14px">Your email is used only to confirm your account and, if you choose, to send reply notifications. It is never shown publicly or shared.</p>`:''}
+    <button class="btn btn-rust btn-block" onclick="submitAuth()">
+      ${signup?'Create account':'Sign in'}</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:8px"
+      onclick="openLogin('${signup?'signin':'signup'}')">
+      ${signup?'I already have an account':'Create a new account'}</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:8px;border:none"
+      onclick="closeLogin()">Cancel</button>
+  </div>`;
+}
+function closeLogin(){const o=document.getElementById('loginOv');if(o)o.remove();}
+async function submitAuth(){
+  const name=document.getElementById('lgName').value.trim();
+  const pass=document.getElementById('lgPass').value;
+  const cityEl=document.getElementById('lgCity');
+  const city=cityEl?cityEl.value.trim():'';
+  const emailEl=document.getElementById('lgEmail');
+  const email=emailEl?emailEl.value.trim():'';
+  if(name.length<2){toast('Name must be at least 2 characters');return;}
+  if(pass.length<6){toast('Password must be at least 6 characters');return;}
+  if(AUTHMODE==='signup'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    toast('Enter a valid email address');return;
+  }
+  const endpoint=AUTHMODE==='signup'?'/api/signup':'/api/signin';
+  try{
+    const r=await api(endpoint,{method:'POST',json:{name,password:pass,city,email}});
+    STATE.token=r.token;
+    localStorage.setItem('tb_token',r.token);
+    STATE.user=await api('/api/me');
+    STATE.votes=await api('/api/myvotes');
+    if(STATE.user.isAdmin) await refreshReportCount();
+    startNotifPolling();
+    closeLogin();renderUser();
+    document.getElementById('fab').style.display=STATE.view.name!=='new'?'':'none';
+    render();
+    toast('Welcome, '+r.name+'!');
+    // local-testing fallback: if no mail key is set, show the confirm link
+    if(r.confirmLinkForTesting){ showConfirmLink(r.confirmLinkForTesting); }
+  }catch(e){
+    if(e.data&&e.data.needsPassword){
+      toast('Set a password for this older account to continue');
+    }else toast(e.message);
+  }
+}
+function logout(){
+  STATE.token=null;STATE.user=null;STATE.votes={};STATE.openReports=0;STATE.notifs=[];
+  if(NOTIF_TIMER){clearInterval(NOTIF_TIMER);NOTIF_TIMER=null;}
+  const c=document.getElementById('bellCount');if(c)c.textContent='';
+  localStorage.removeItem('tb_token');
+  renderUser();go('home');
+}
+
+/* local-testing helper: when no mail key is configured, the server
+   returns the confirmation link directly so it can be shown here */
+function showConfirmLink(link){
+  const ov=document.createElement('div');ov.className='overlay';ov.id='clOv';
+  ov.innerHTML=`<div class="modal">
+    <h2>Confirm your email</h2>
+    <p class="sub">No mail service is connected yet, so here is your
+      confirmation link for testing. Once you add a mail key, this is
+      sent to the member's inbox automatically instead.</p>
+    <div class="field"><input readonly value="${esc(link)}" onclick="this.select()"></div>
+    <a class="btn btn-rust btn-block" href="${esc(link)}" target="_blank"
+       style="text-align:center;text-decoration:none">Open confirmation link</a>
+    <button class="btn btn-ghost btn-block" style="margin-top:8px"
+      onclick="document.getElementById('clOv').remove()">Close</button>
+  </div>`;
+  ov.onclick=e=>{if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+}
+async function resendConfirmation(){
+  try{
+    const r=await api('/api/resend-confirmation',{method:'POST',json:{}});
+    if(r.already){ toast('Your email is already confirmed'); return; }
+    toast('Confirmation email sent');
+    if(r.confirmLinkForTesting) showConfirmLink(r.confirmLinkForTesting);
+  }catch(e){ toast(e.message); }
+}
+
+/* ---------- notifications ---------- */
+let NOTIF_TIMER=null;
+async function refreshNotifs(){
+  if(!STATE.user)return;
+  try{
+    const data=await api('/api/notifications');
+    STATE.notifs=data.items||[];
+    const c=document.getElementById('bellCount');
+    if(c) c.textContent=data.unseen>0?(data.unseen>9?'9+':String(data.unseen)):'';
+  }catch(e){}
+}
+function startNotifPolling(){
+  if(NOTIF_TIMER)clearInterval(NOTIF_TIMER);
+  if(!STATE.user)return;
+  refreshNotifs();
+  // check for new notifications every 45 seconds
+  NOTIF_TIMER=setInterval(refreshNotifs,45000);
+}
+async function toggleNotifs(){
+  const existing=document.getElementById('notifPanel');
+  if(existing){ existing.remove(); return; }
+  await refreshNotifs();
+  const panel=document.createElement('div');
+  panel.className='notif-panel';
+  panel.id='notifPanel';
+  const items=STATE.notifs||[];
+  panel.innerHTML=`
+    <h3>Notifications ${items.length?`<button onclick="markNotifsSeen()">Mark all read</button>`:''}</h3>
+    ${items.length?items.map(n=>`
+      <div class="notif-item ${n.seen?'':'unseen'}" onclick="openNotif('${n.threadId}')">
+        ${esc(n.text)}
+        <div class="nt-when">${ago(n.created)}</div>
+      </div>`).join('')
+      :`<div class="notif-empty">No notifications yet.</div>`}`;
+  document.body.appendChild(panel);
+  // close when clicking elsewhere
+  setTimeout(()=>{
+    document.addEventListener('click',closeNotifOnOutside);
+  },50);
+}
+function closeNotifOnOutside(e){
+  const panel=document.getElementById('notifPanel');
+  const bell=document.getElementById('bellBtn');
+  if(panel&&!panel.contains(e.target)&&!bell.contains(e.target)){
+    panel.remove();
+    document.removeEventListener('click',closeNotifOnOutside);
+  }
+}
+function openNotif(threadId){
+  const panel=document.getElementById('notifPanel');
+  if(panel)panel.remove();
+  document.removeEventListener('click',closeNotifOnOutside);
+  markNotifsSeen(true);
+  if(threadId) openThread(threadId);
+}
+async function markNotifsSeen(quiet){
+  try{
+    await api('/api/notifications/seen',{method:'POST',json:{}});
+    const c=document.getElementById('bellCount');
+    if(c)c.textContent='';
+    (STATE.notifs||[]).forEach(n=>n.seen=true);
+    if(!quiet){
+      const panel=document.getElementById('notifPanel');
+      if(panel){
+        panel.querySelectorAll('.notif-item').forEach(el=>el.classList.remove('unseen'));
+      }
+    }
+  }catch(e){}
+}
+
+/* ---------- photo picking ---------- */
+function pickPhotos(target){
+  const inp=document.createElement('input');
+  inp.type='file';inp.accept='image/*';inp.multiple=true;
+  inp.onchange=()=>{
+    const arr=target==='draft'?STATE.draftPhotos:STATE.replyPhotos;
+    [...inp.files].slice(0,4-arr.length).forEach(f=>{
+      if(f.type.startsWith('image/'))arr.push(f);
+    });
+    renderPhotoPreview(target);
+  };
+  inp.click();
+}
+function removePhoto(target,i){
+  (target==='draft'?STATE.draftPhotos:STATE.replyPhotos).splice(i,1);
+  renderPhotoPreview(target);
+}
+function renderPhotoPreview(target){
+  const arr=target==='draft'?STATE.draftPhotos:STATE.replyPhotos;
+  const el=document.getElementById(target==='draft'?'draftPrev':'replyPrev');
+  if(!el)return;
+  el.innerHTML=arr.map((f,i)=>{
+    const url=URL.createObjectURL(f);
+    return `<div class="thumb"><img src="${url}"><button class="rm" onclick="removePhoto('${target}',${i})">×</button></div>`;
+  }).join('');
+}
+
+/* ---------- voting ---------- */
+async function vote(targetId,kind,dir){
+  if(!STATE.user){ openLogin(); return; }
+  try{
+    const r=await api('/api/vote',{method:'POST',json:{targetId,kind,dir}});
+    const prev=STATE.votes[targetId];
+    STATE.votes[targetId]=(prev===dir)?undefined:dir;
+    // update local copy
+    const apply=o=>{if(o&&o.id===targetId){o.up=r.up;o.down=r.down;}};
+    STATE.threads.forEach(t=>{apply(t);(t.posts||[]).forEach(apply);});
+    if(STATE.current){ apply(STATE.current);(STATE.current.posts||[]).forEach(apply); }
+    render();
+  }catch(e){ toast(e.message); }
+}
+
+/* ---------- posting ---------- */
+async function createThread(){
+  if(!STATE.user){ openLogin(); return; }
+  const section=document.getElementById('ntSection').value;
+  const title=document.getElementById('ntTitle').value.trim();
+  const body=document.getElementById('ntBody').value.trim();
+  const locEl=document.getElementById('ntLocation');
+  const location=locEl?locEl.value.trim():'';
+  if(title.length<6){toast('Give your Talk a fuller title');return;}
+  if(body.length<10){toast('Add a bit more to your post');return;}
+  if(SECMAP[section].local&&!location){toast('Add your city / area');return;}
+  const fd=new FormData();
+  fd.append('section',section);fd.append('title',title);
+  fd.append('body',body);fd.append('location',location);
+  STATE.draftPhotos.forEach(f=>fd.append('photos',f));
+  const btn=document.getElementById('ntSubmit');
+  if(btn){btn.disabled=true;btn.textContent='Posting…';}
+  try{
+    const t=await api('/api/threads',{method:'POST',body:fd});
+    STATE.draftPhotos=[];
+    STATE.user=await api('/api/me');
+    toast('Thread posted');
+    openThread(t.id);
+  }catch(e){
+    if(e.data&&e.data.error==='newmember_gate'){
+      toast('Thread creation unlocks in '+waitText(e.data.msLeft||0));
+    }else toast(e.message);
+    if(btn){btn.disabled=false;btn.textContent='Post Talk';}
+  }
+}
+async function addReply(tid){
+  if(!STATE.user){ openLogin(); return; }
+  const body=document.getElementById('replyBox').value.trim();
+  if(body.length<2&&STATE.replyPhotos.length===0){toast('Write a reply or add a photo');return;}
+  const fd=new FormData();
+  fd.append('body',body);
+  STATE.replyPhotos.forEach(f=>fd.append('photos',f));
+  const btn=document.getElementById('rpSubmit');
+  if(btn){btn.disabled=true;btn.textContent='Posting…';}
+  try{
+    const t=await api('/api/threads/'+tid+'/replies',{method:'POST',body:fd});
+    STATE.replyPhotos=[];
+    STATE.current=t;
+    STATE.user=await api('/api/me');  // reply unlocks the gate
+    render();
+    toast('Reply posted');
+  }catch(e){
+    toast(e.message);
+    if(btn){btn.disabled=false;btn.textContent='Post Reply';}
+  }
+}
+
+/* ---------- data loaders ---------- */
+async function loadThreads(section){
+  let path='/api/threads';
+  const qs=[];
+  if(section)qs.push('section='+section);
+  if(qs.length)path+='?'+qs.join('&');
+  STATE.threads=await api(path);
+}
+async function openThread(tid){
+  STATE.view={name:'thread',arg:tid};
+  STATE.replyPhotos=[];
+  window.scrollTo(0,0);renderNav();
+  document.getElementById('fab').style.display='none';
+  document.getElementById('app').innerHTML='<div class="loading">Loading Talk…</div>';
+  try{
+    STATE.current=await api('/api/threads/'+tid);
+    render();
+  }catch(e){
+    document.getElementById('app').innerHTML=
+      '<div class="empty">This Talk was not found — it may have expired and been removed.</div>';
+  }
+}
+
+/* ---------- lightbox ---------- */
+function lightbox(src){
+  const lb=document.createElement('div');lb.className='lightbox';
+  lb.innerHTML=`<img src="${src}">`;
+  lb.onclick=()=>lb.remove();
+  document.body.appendChild(lb);
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function render(){
+  const v=STATE.view;
+  if(v.name==='home')renderHome();
+  else if(v.name==='section')renderSection(v.arg);
+  else if(v.name==='thread')renderThread();
+  else if(v.name==='new')renderNew(v.arg);
+  else if(v.name==='search')renderSearch(v.arg);
+  else if(v.name==='admin')renderAdmin();
+  else if(v.name==='account')renderAccount();
+  else if(v.name==='explore')renderExplore();
+  renderEmailBanner();
+  syncBottomNav();
+}
+
+/* gentle reminder for members who haven't confirmed their email.
+   Posting is NOT blocked — it's just a prompt. */
+function renderEmailBanner(){
+  const existing=document.getElementById('emailBanner');
+  if(existing)existing.remove();
+  if(!STATE.user||!STATE.user.hasEmail||STATE.user.emailConfirmed)return;
+  const bar=document.createElement('div');
+  bar.id='emailBanner';
+  bar.className='email-banner';
+  bar.innerHTML=`<span>📧 Please confirm your email to get the
+    <b>Verified</b> badge and reply notifications.</span>
+    <button onclick="resendConfirmation()">Resend link</button>`;
+  const main=document.getElementById('app');
+  main.parentNode.insertBefore(bar,main);
+}
+
+function threadRowHtml(t,showSec){
+  const sec=SECMAP[t.section]||{name:t.section,accent:'#999'};
+  const exp=expiry(t.created);
+  const thumb=t.photos&&t.photos.length?`<img class="t-thumb" src="${t.photos[0]}" alt="">`:'';
+  // a genuine "active" marker — based on real recent activity, not invented numbers
+  const fresh=(Date.now()-t.created)<6*36e5 && (t.replyCount||0)>=1;
+  const liveTag=fresh?`<span class="live-tag"><span class="dot"></span>active</span>`:'';
+  return `<div class="thread-row" onclick="openThread('${t.id}')">
+    <div class="votecol">
+      <div class="score" style="color:${score(t)>=0?'var(--green)':'var(--rose)'}">${score(t)>0?'+':''}${score(t)}</div>
+      <div class="lbl">votes</div>
+    </div>
+    ${thumb}
+    <div class="t-main">
+      <div class="t-title">${esc(t.title)}</div>
+      <div class="t-prev">${esc(t.body)}</div>
+      <div class="t-meta">
+        ${showSec?`<span class="pill" style="background:${sec.accent}">${sec.name}</span>`:''}
+        ${t.location?`<span class="loc-pill">📍 ${esc(t.location)}</span>`:''}
+        ${liveTag}
+        <span class="author">${esc(t.author)}</span>${badgeMarks(t.authorBadges)}${t.authorTier?`<span class="tier-badge" style="background:${t.authorTierColor||'#8b909e'}">${t.authorTierIcon||''} ${esc(t.authorTier)}</span>`:''}
+        <span>${ago(t.created)}</span>
+        <span>👁 ${t.views||0}</span>
+        <span>💬 ${t.replyCount||0}</span>
+        ${t.photos&&t.photos.length?`<span>📷 ${t.photos.length}</span>`:''}
+        <span class="exp-pill ${exp.soon?'soon':''}">🕒 ${exp.txt}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* which feed filter tab is active */
+let FEED='foryou';
+function setFeed(f){ FEED=f; renderHome(); }
+
+function feedThreads(){
+  const a=STATE.threads.slice();
+  if(FEED==='trending')
+    return a.sort((x,y)=>(score(y)+(y.replyCount||0)+(y.views||0)/10)
+                        -(score(x)+(x.replyCount||0)+(x.views||0)/10));
+  if(FEED==='latest')
+    return a.sort((x,y)=>y.created-x.created);
+  if(FEED==='nearby'){
+    const city=(STATE.user&&STATE.user.city||'').toLowerCase();
+    if(city) return a.filter(t=>(t.location||'').toLowerCase().includes(city.split(',')[0].trim()));
+    return a;
+  }
+  // 'foryou' — a light blend of recency and engagement
+  return a.sort((x,y)=>{
+    const sc=t=>score(t)+(t.replyCount||0)*2+(t.views||0)/15
+      -(Date.now()-t.created)/36e5/6;
+    return sc(y)-sc(x);
+  });
+}
+
+async function renderHome(){
+  const app=document.getElementById('app');
+  app.innerHTML='<div class="loading">Loading…</div>';
+  try{ await loadThreads(); }catch(e){ app.innerHTML='<div class="empty">Could not reach the server.</div>'; return; }
+
+  // hero strip — only for signed-in members
+  const hero=STATE.user?`
+    <div class="hero">
+      <h2>Welcome back, ${esc(STATE.user.name)} 👋</h2>
+      <p>What's happening in your community today?</p>
+      <div class="hero-chips">
+        ${SECTIONS.map(s=>`<a onclick="go('section','${s.id}')">${s.name}</a>`).join('')}
+        <a onclick="newThreadClick()">✏️ ${t('btn.newtalk')}</a>
+      </div>
+    </div>`:'';
+
+  // feed filter tabs
+  const tabs=[
+    ['foryou','For You'],['trending','Trending'],
+    ['latest','Latest'],['nearby','Nearby'],
+  ];
+  const tabBar=`<div class="feed-tabs">${tabs.map(([k,lbl])=>
+    `<a class="${FEED===k?'active':''}" onclick="setFeed('${k}')">${lbl}</a>`).join('')}</div>`;
+
+  // trending strip — horizontal scroll
+  const trend=STATE.threads.slice()
+    .sort((a,b)=>(score(b)+(b.replyCount||0))-(score(a)+(a.replyCount||0))).slice(0,6);
+  const trendStrip=trend.length?`
+    <div class="trend-strip">
+      <h3>🔥 ${t('home.trending')}</h3>
+      <div class="trend-row">${trend.map(x=>`
+        <div class="trend-card" onclick="openThread('${x.id}')">
+          <div class="tc-title">${esc(x.title)}</div>
+          <div class="tc-meta">👁 ${x.views||0} · 💬 ${x.replyCount||0}</div>
+        </div>`).join('')}</div>
+    </div>`:'';
+
+  const feed=feedThreads();
+  let feedHtml;
+  if(!feed.length){
+    feedHtml=`<div class="empty">${FEED==='nearby'
+      ? 'No Talks near you yet — try another feed or start one.'
+      : 'No Talks yet — tap “'+t('btn.newtalk')+'” to start the first one.'}</div>`;
+  }else{
+    // insert the trending strip after the first 6 cards
+    const top=feed.slice(0,6).map(x=>threadRowHtml(x,true)).join('');
+    const rest=feed.slice(6).map(x=>threadRowHtml(x,true)).join('');
+    feedHtml=`<div class="thread-list">${top}</div>`+
+      (rest?trendStrip+`<div class="thread-list">${rest}</div>`:trendStrip);
+  }
+
+  app.innerHTML=`
+    ${hero}
+    <div class="page-head page-head-row">
+      <div><h1>${t('home.title')}</h1><p>${t('home.sub')}</p></div>
+      <button class="btn btn-rust new-talk-btn" onclick="newThreadClick()">✏️ ${t('btn.newtalk')}</button>
+    </div>
+    ${tabBar}
+    ${feedHtml}`;
+}
+
+/* explore page — browse the sections */
+async function renderExplore(){
+  const app=document.getElementById('app');
+  app.innerHTML='<div class="loading">Loading…</div>';
+  try{ await loadThreads(); }catch(e){ app.innerHTML='<div class="empty">Could not reach the server.</div>'; return; }
+  const cards=SECTIONS.map(s=>{
+    const ts=STATE.threads.filter(t=>t.section===s.id);
+    const replies=ts.reduce((a,t)=>a+(t.replyCount||0),0);
+    return `<div class="sec-card" style="--accent:${s.accent}" onclick="go('section','${s.id}')">
+      <h3>${s.name}</h3><div class="desc">${s.desc}</div>
+      <div class="meta"><span><b>${ts.length}</b> ${t('word.talks')}</span><span><b>${replies}</b> ${t('word.replies')}</span></div>
+    </div>`;
+  }).join('');
+  app.innerHTML=`
+    <div class="page-head"><h1>🔍 Explore</h1><p>Browse every section of the board</p></div>
+    <div class="sec-grid">${cards}</div>`;
+}
+
+async function renderSection(secId){
+  const sec=SECMAP[secId];
+  const app=document.getElementById('app');
+  app.innerHTML='<div class="loading">Loading…</div>';
+  try{ await loadThreads(secId); }catch(e){ app.innerHTML='<div class="empty">Could not reach the server.</div>'; return; }
+  let ts=STATE.threads.slice();
+  if(sec.local&&STATE.locFilter.trim()){
+    const q=STATE.locFilter.toLowerCase();
+    ts=ts.filter(t=>(t.location||'').toLowerCase().includes(q));
+  }
+  if(STATE.sort==='top')ts.sort((a,b)=>score(b)-score(a));
+  else if(STATE.sort==='replies')ts.sort((a,b)=>(b.replyCount||0)-(a.replyCount||0));
+  // 'new' is server default order
+  const locTool=sec.local
+    ?`<input placeholder="📍 Filter by area…" value="${esc(STATE.locFilter)}"
+        oninput="STATE.locFilter=this.value;clearTimeout(window._lf);window._lf=setTimeout(()=>renderSection('${secId}'),250)">`:'';
+  app.innerHTML=`
+    <div class="crumbs"><span onclick="go('home')">Home</span> › ${sec.name}</div>
+    <div class="page-head page-head-row">
+      <div><h1>${sec.name}</h1><p>${sec.desc}</p></div>
+      <button class="btn btn-rust new-talk-btn" onclick="newThreadClick('${secId}')">✏️ ${t("btn.newtalk")}</button>
+    </div>
+    <div class="toolbar">
+      <span style="font-size:13px;color:var(--muted)">${ts.length} Talk${ts.length!==1?'s':''}</span>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        ${locTool}
+        <select class="sel" onchange="STATE.sort=this.value;renderSection('${secId}')">
+          <option value="new"${STATE.sort==='new'?' selected':''}>${t('sort.newest')}</option>
+          <option value="top"${STATE.sort==='top'?' selected':''}>${t('sort.top')}</option>
+          <option value="replies"${STATE.sort==='replies'?' selected':''}>${t('sort.replies')}</option>
+        </select>
+      </div>
+    </div>
+    ${ts.length?`<div class="thread-list">${ts.map(t=>threadRowHtml(t,false)).join('')}</div>`
+      :`<div class="empty">No Talks here yet — tap “New Talk” to start the first one.</div>`}`;
+}
+
+function postHtml(o,isOp,tid){
+  const mv=STATE.votes[o.id];
+  const up=o.up||0,down=o.down||0;
+  const kind=isOp?'thread':'post';
+  const exp=expiry(o.created);
+  const photos=(o.photos&&o.photos.length)
+    ?`<div class="post-photos">${o.photos.map(p=>`<img src="${p}" onclick="lightbox('${p}')">`).join('')}</div>`:'';
+  const isAdmin=STATE.user&&STATE.user.isAdmin;
+  const signedIn=!!STATE.user;
+  // moderation row
+  let modRow='';
+  if(o.removed){
+    modRow=`<div class="mod-banner">🚫 Removed by ${esc(o.removedBy||'an admin')}
+      ${isAdmin?`<button class="mod-link" onclick="modRestore('${o.id}','${kind}')">Restore</button>`:''}</div>`;
+  }
+  const reportBtn=signedIn&&!o.removed
+    ?`<button class="mod-link" onclick="openReport('${o.id}','${kind}')">⚑ Report</button>`:'';
+  const removeBtn=isAdmin&&!o.removed
+    ?`<button class="mod-link danger" onclick="modRemove('${o.id}','${kind}')">Remove</button>`:'';
+  const tierBadge=o.authorTier
+    ?`<span class="tier-badge" style="background:${o.authorTierColor||'#8b909e'}">${o.authorTierIcon||''} ${esc(o.authorTier)}</span>`:'';
+  const verifiedMark=badgeMarks(o.authorBadges);
+  const staffBadge=(o.authorRole==='superadmin')
+    ?'<span class="staff-badge lead">Lead admin</span>'
+    :(o.authorRole==='moderator')
+    ?'<span class="staff-badge mod">Moderator</span>':'';
+  return `<div class="post ${isOp?'op':''} ${o.removed?'is-removed':''}">
+    ${modRow}
+    <div class="post-head">
+      <div class="avatar" style="background:${avatarColor(o.author)}">${esc(o.author[0].toUpperCase())}</div>
+      <div style="min-width:0">
+        <div class="pname">${esc(o.author)}${verifiedMark} ${tierBadge}${staffBadge}</div>
+        <div class="when">${isOp?'started this Talk':'replied'} · ${ago(o.created)}${o.authorJoined?' · member since '+esc(o.authorJoined):''}</div>
+      </div>
+    </div>
+    <div class="post-content">
+      <div class="text">${esc(o.body)}</div>
+      ${photos}
+      <div class="post-foot">
+        <button class="vbtn ${mv==='up'?'on':''}" onclick="vote('${o.id}','${kind}','up')">▲ Helpful</button>
+        <span class="vcount" style="color:${(up-down)>=0?'var(--green)':'var(--rose)'}">${up-down>0?'+':''}${up-down}</span>
+        <button class="vbtn down ${mv==='down'?'on':''}" onclick="vote('${o.id}','${kind}','down')">▼</button>
+        ${reportBtn}${removeBtn}
+        <span class="post-exp">🕒 ${exp.txt}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- reporting ---------- */
+function openReport(targetId,kind){
+  if(!STATE.user){ openLogin(); return; }
+  const ov=document.createElement('div');ov.className='overlay';ov.id='reportOv';
+  ov.innerHTML=`<div class="modal">
+    <h2>Report this ${kind==='thread'?'Talk':'reply'}</h2>
+    <p class="sub">Tell the moderators what's wrong. Reports are private and reviewed by an admin.</p>
+    <div class="field"><label>Reason</label>
+      <select id="rpReason" class="sel" style="width:100%">
+        <option>Spam or advertising</option>
+        <option>Abusive or hateful</option>
+        <option>Harassment or bullying</option>
+        <option>Off-topic for this section</option>
+        <option>Misinformation</option>
+        <option>Other</option>
+      </select></div>
+    <div class="field"><label>Details <span class="hint">(optional)</span></label>
+      <textarea id="rpNote" maxlength="300" style="min-height:70px" placeholder="Anything the moderator should know"></textarea></div>
+    <button class="btn btn-rust btn-block" onclick="submitReport('${targetId}','${kind}')">Send report</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:8px" onclick="closeReport()">Cancel</button>
+  </div>`;
+  ov.onclick=e=>{if(e.target===ov)closeReport();};
+  document.body.appendChild(ov);
+}
+function closeReport(){const o=document.getElementById('reportOv');if(o)o.remove();}
+async function submitReport(targetId,kind){
+  const reason=document.getElementById('rpReason').value;
+  const note=document.getElementById('rpNote').value.trim();
+  try{
+    const r=await api('/api/report',{method:'POST',
+      json:{targetId,kind,reason:reason+(note?(' — '+note):'')}});
+    closeReport();
+    toast(r.already?'You have already reported this':'Report sent — thank you');
+  }catch(e){ toast(e.message); }
+}
+
+/* ---------- admin moderation actions ---------- */
+async function modRemove(targetId,kind){
+  if(!confirm('Remove this '+kind+'? It will be hidden from everyone. You can restore it later.'))return;
+  try{
+    const r=await api('/api/admin/remove',{method:'POST',json:{targetId,kind}});
+    STATE.openReports=r.openCount||0;
+    toast(kind.charAt(0).toUpperCase()+kind.slice(1)+' removed');
+    if(STATE.view.name==='thread'&&STATE.current){
+      if(kind==='thread'&&STATE.current.id===targetId){ go('home'); return; }
+      STATE.current=await api('/api/threads/'+STATE.current.id);
+    }
+    renderUser();render();
+  }catch(e){ toast(e.message); }
+}
+async function modRestore(targetId,kind){
+  try{
+    await api('/api/admin/restore',{method:'POST',json:{targetId,kind}});
+    toast('Restored');
+    if(STATE.view.name==='thread'&&STATE.current){
+      STATE.current=await api('/api/threads/'+STATE.current.id);
+    }
+    render();
+  }catch(e){ toast(e.message); }
+}
+async function refreshReportCount(){
+  try{
+    const r=await api('/api/admin/reports');
+    STATE.openReports=r.openCount||0;
+  }catch(e){ STATE.openReports=0; }
+}
+
+function renderThread(){
+  const t=STATE.current;
+  const app=document.getElementById('app');
+  if(!t){app.innerHTML='<div class="empty">Thread not found.</div>';return;}
+  const sec=SECMAP[t.section]||{name:t.section,accent:'#999'};
+  const replies=(t.posts||[]).map(p=>postHtml(p,false,t.id)).join('');
+  const replyArea=STATE.user
+    ?`<div class="composer">
+        <h3>Post a reply</h3>
+        <div class="field"><textarea id="replyBox" placeholder="Share your view — keep it respectful and on topic…"></textarea></div>
+        <div class="field">
+          <button class="btn btn-ghost" onclick="pickPhotos('reply')">📷 Add photos</button>
+          <span class="hint" style="margin-left:8px;color:var(--muted)">Up to 4</span>
+          <div class="photo-preview" id="replyPrev"></div>
+        </div>
+        <button class="btn btn-rust btn-block" id="rpSubmit" onclick="addReply('${t.id}')">${t('btn.postreply')}</button>
+      </div>`
+    :`<div class="empty"><p style="margin-bottom:10px">Sign in to join this conversation.</p>
+        <button class="btn btn-rust" onclick="openLogin()">${t('btn.signin')}</button></div>`;
+  app.innerHTML=`
+    <div class="crumbs"><span onclick="go('home')">Home</span> ›
+      <span onclick="go('section','${t.section}')">${sec.name}</span> › Thread</div>
+    <div class="page-head">
+      <span class="pill" style="background:${sec.accent}">${sec.name}</span>
+      ${t.location?`<span class="loc-pill" style="margin-left:5px">📍 ${esc(t.location)}</span>`:''}
+      <h1 style="margin-top:6px">${esc(t.title)}</h1>
+      <p>${(t.posts||[]).length} repl${(t.posts||[]).length===1?'y':'ies'} · 👁 ${t.views||0} view${(t.views||0)===1?'':'s'} · started ${ago(t.created)} · ${expiry(t.created).txt}</p>
+    </div>
+    ${postHtml(t,true,t.id)}
+    ${replies}
+    ${replyArea}`;
+  renderPhotoPreview('reply');
+}
+
+function renderNew(presetSec){
+  const app=document.getElementById('app');
+  if(!STATE.user){
+    app.innerHTML=`<div class="empty"><p style="margin-bottom:10px">Sign in before starting a Talk.</p>
+      <button class="btn btn-rust" onclick="openLogin()">${t('btn.signin')}</button></div>`;
+    return;
+  }
+  if(!STATE.user.canCreateThreads){
+    app.innerHTML=`
+      <div class="crumbs"><span onclick="go('home')">Home</span> › New Talk</div>
+      <div class="page-head"><h1>Almost there</h1><p>A short wait before new members can start Talks</p></div>
+      <div class="empty" style="text-align:left;padding:24px 22px">
+        <p style="font-size:16px;color:var(--ink);margin-bottom:10px">🕒 Starting Talks isn't unlocked yet.</p>
+        <p style="margin-bottom:10px">As a new member you can <b>reply to any Talk right now</b> — jump into a conversation.</p>
+        <p style="margin-bottom:16px">Starting your own Talks unlocks as soon as you post your first reply, or after a short wait — whichever comes first. This just helps keep spam off the board.</p>
+        <button class="btn btn-rust btn-block" onclick="go('home')">Browse Talks to reply to</button>
+      </div>`;
+    return;
+  }
+  const sec=presetSec||SECTIONS[0].id;
+  app.innerHTML=`
+    <div class="crumbs"><span onclick="go('home')">Home</span> › New Talk</div>
+    <div class="page-head"><h1>${t('btn.starttalk')}</h1>
+      <p>Share news, ask a question or open a discussion · auto-deletes after 30 days</p></div>
+    <div class="composer">
+      <div class="field"><label>Section</label>
+        <select id="ntSection" onchange="toggleLoc()">
+          ${SECTIONS.map(s=>`<option value="${s.id}"${sec===s.id?' selected':''}>${s.name}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field" id="locField" style="display:none">
+        <label>City / area <span class="hint">(this section is organised by location)</span></label>
+        <input id="ntLocation" maxlength="40" placeholder="e.g. Dinnington, Sheffield">
+      </div>
+      <div class="field"><label>${t("compose.title")}</label>
+        <input id="ntTitle" maxlength="120" placeholder="A clear, specific title gets more replies"></div>
+      <div class="field"><label>${t("compose.message")}</label>
+        <textarea id="ntBody" placeholder="Set out your point, question or news. Be clear and civil."></textarea></div>
+      <div class="field"><label>Photos <span class="hint">(optional, up to 4)</span></label>
+        <button class="btn btn-ghost" onclick="pickPhotos('draft')">📷 Add photos</button>
+        <div class="photo-preview" id="draftPrev"></div>
+      </div>
+      <button class="btn btn-rust btn-block" id="ntSubmit" onclick="createThread()">${t("btn.posttalk")}</button>
+      <button class="btn btn-ghost btn-block" style="margin-top:8px" onclick="go('home')">Cancel</button>
+    </div>`;
+  toggleLoc();
+  if(STATE.user.city){
+    const li=document.getElementById('ntLocation');
+    if(li&&!li.value)li.value=STATE.user.city;
+  }
+}
+function toggleLoc(){
+  const sel=document.getElementById('ntSection');
+  const f=document.getElementById('locField');
+  if(!sel||!f)return;
+  const isLocal=SECMAP[sel.value].local;
+  f.style.display=isLocal?'block':'none';
+  if(isLocal&&STATE.user&&STATE.user.city){
+    const li=document.getElementById('ntLocation');
+    if(li&&!li.value)li.value=STATE.user.city;
+  }
+}
+
+async function renderSearch(q){
+  const app=document.getElementById('app');
+  app.innerHTML='<div class="loading">Searching…</div>';
+  try{ await loadThreads(); }catch(e){ app.innerHTML='<div class="empty">Could not reach the server.</div>'; return; }
+  const ql=q.toLowerCase();
+  const hits=STATE.threads.filter(t=>
+    t.title.toLowerCase().includes(ql)||
+    t.body.toLowerCase().includes(ql)||
+    (t.location||'').toLowerCase().includes(ql));
+  app.innerHTML=`
+    <div class="crumbs"><span onclick="go('home')">Home</span> › Search</div>
+    <div class="page-head"><h1>Results for “${esc(q)}”</h1>
+      <p>${hits.length} Talk${hits.length!==1?'s':''} found</p></div>
+    ${hits.length?`<div class="thread-list">${hits.map(t=>threadRowHtml(t,true)).join('')}</div>`
+      :`<div class="empty">Nothing matched. Try different keywords.</div>`}`;
+}
+
+/* ---------- account page: profile + notification settings ---------- */
+async function renderAccount(){
+  const app=document.getElementById('app');
+  if(!STATE.user){
+    app.innerHTML='<div class="empty">Sign in to view your account.</div>';
+    return;
+  }
+  // refresh user data so score/tier are current
+  try{ STATE.user=await api('/api/me'); }catch(e){}
+  const u=STATE.user;
+  const badges=(u.badges||[]).map(b=>
+    `<span class="vbadge" style="background:${b.color}">${b.mark}</span> ${esc(b.label)}`
+  ).join('  ') || 'None yet';
+  const emailState=u.emailConfirmed
+    ?'<span style="color:var(--green);font-weight:700">✓ Confirmed</span>'
+    :'<span style="color:var(--amber);font-weight:700">Not confirmed yet</span>';
+  app.innerHTML=`
+    <div class="crumbs"><span onclick="go('home')">Home</span> › My Account</div>
+    <div class="page-head"><h1>My Account</h1>
+      <p>Your profile and notification settings</p></div>
+
+    <div class="composer">
+      <div style="display:flex;align-items:center;gap:13px;margin-bottom:14px">
+        <div class="avatar" style="width:52px;height:52px;font-size:21px;background:${avatarColor(u.name)}">${esc(u.name[0].toUpperCase())}</div>
+        <div>
+          <div style="font-weight:800;font-size:17px">${esc(u.name)}</div>
+          <div style="font-size:12.5px;color:var(--muted)">Member since ${esc(u.joinedLabel||'')}</div>
+        </div>
+      </div>
+      <div class="acct-grid">
+        <div><span class="acct-k">Reputation</span>
+          <span class="tier-badge" style="background:${u.tierColor}">${u.tierIcon||''} ${esc(u.tier)}</span>
+          <span style="font-size:12px;color:var(--muted)"> · ${u.score} points</span></div>
+        <div><span class="acct-k">Talks started</span> ${u.talkCount||0}</div>
+        <div><span class="acct-k">Replies written</span> ${u.replyCount||0}</div>
+        <div><span class="acct-k">Verification</span> ${badges}</div>
+        <div><span class="acct-k">Email</span> ${emailState}
+          ${!u.emailConfirmed?'<button class="btn btn-ghost btn-sm" style="margin-left:6px" onclick="resendConfirmation()">Confirm now</button>':''}</div>
+      </div>
+    </div>
+
+    <div class="composer">
+      <h3>Notification settings</h3>
+      <label class="toggle-row">
+        <span>
+          <b>Email me when I get a reply</b><br>
+          <span style="font-size:12px;color:var(--muted)">
+            ${u.emailConfirmed?'Sends to your confirmed email address.'
+              :'Confirm your email first for this to work.'}</span>
+        </span>
+        <input type="checkbox" id="emailNotifToggle" ${u.emailNotify?'checked':''}
+          onchange="saveNotifPref(this.checked)">
+      </label>
+      <p style="font-size:12px;color:var(--muted);margin-top:10px">
+        In-app notifications (the 🔔 bell) are always on — this setting
+        only controls email.</p>
+    </div>
+
+    <button class="btn btn-ghost btn-block" onclick="logout()">Log out</button>`;
+}
+async function saveNotifPref(on){
+  try{
+    await api('/api/notifications/pref',{method:'POST',json:{emailNotify:on}});
+    STATE.user.emailNotify=on;
+    toast(on?'Email notifications on':'Email notifications off');
+  }catch(e){ toast(e.message); }
+}
+
+/* ---------- admin moderation panel ---------- */
+async function renderAdmin(){
+  const app=document.getElementById('app');
+  if(!STATE.user||!STATE.user.isAdmin){
+    app.innerHTML='<div class="empty">This area is for admins only.</div>';
+    return;
+  }
+  app.innerHTML='<div class="loading">Loading reports…</div>';
+  let data;
+  try{ data=await api('/api/admin/reports'); }
+  catch(e){ app.innerHTML='<div class="empty">Could not load reports.</div>'; return; }
+  STATE.openReports=data.openCount||0;
+  renderUser();
+
+  const cards=data.reports.map(r=>{
+    const c=r.content;
+    let contentBlock;
+    if(!c){
+      contentBlock=`<div class="rc-content" style="color:var(--muted)">
+        This content has already been deleted (expired or removed).</div>`;
+    }else{
+      const photos=(c.photos&&c.photos.length)
+        ?`<div class="post-photos" style="margin-top:7px">${c.photos.map(p=>
+            `<img src="${p}" onclick="lightbox('${p}')">`).join('')}</div>`:'';
+      contentBlock=`<div class="rc-content">
+        <div class="rc-author">${esc(c.author)} · ${c.kind==='thread'?'Talk':'reply'}${c.removed?' · already removed':''}</div>
+        ${c.title?`<div style="font-weight:700;margin-bottom:3px">${esc(c.title)}</div>`:''}
+        <div>${esc((c.body||'').slice(0,400))}${(c.body||'').length>400?'…':''}</div>
+        ${photos}
+      </div>`;
+    }
+    const actions=[];
+    if(c&&!c.removed){
+      actions.push(`<button class="btn btn-rust btn-sm" onclick="adminRemove(${r.id},'${r.targetId}','${r.targetKind}')">Remove content</button>`);
+      if(c.kind==='post'&&c.threadId){
+        actions.push(`<button class="btn btn-ghost btn-sm" onclick="openThread('${c.threadId}')">View in Talk</button>`);
+      }else if(c.kind==='thread'){
+        actions.push(`<button class="btn btn-ghost btn-sm" onclick="openThread('${c.id}')">Open Talk</button>`);
+      }
+    }
+    actions.push(`<button class="btn btn-ghost btn-sm" onclick="adminDismiss(${r.id})">Dismiss report</button>`);
+    return `<div class="report-card">
+      <div class="rc-reason">⚑ ${esc(r.reason||'No reason given')}</div>
+      <div class="rc-meta">Reported by ${esc(r.reporter)} · ${ago(r.created)}</div>
+      ${contentBlock}
+      <div class="rc-actions">${actions.join('')}</div>
+    </div>`;
+  }).join('');
+
+  // ---- Manage Admins: super-admin only; hidden entirely from moderators ----
+  let teamSection='';
+  if(STATE.user.isSuperAdmin){
+    let team=[];
+    try{ team=(await api('/api/admin/team')).team||[]; }catch(e){}
+    const rows=team.map(m=>{
+      const isSelf=m.name===STATE.user.name;
+      const tag=m.role==='superadmin'
+        ?'<span class="role-tag super">Lead admin</span>'
+        :'<span class="role-tag mod">Moderator</span>';
+      const action=(m.role==='moderator'&&!isSelf)
+        ?`<button class="btn btn-ghost btn-sm" onclick="setRole('${esc(m.name)}','member')">Remove role</button>`:'';
+      return `<div class="team-row">
+        <div class="avatar" style="width:32px;height:32px;font-size:13px;background:${avatarColor(m.name)}">${esc(m.name[0].toUpperCase())}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:800;font-size:13px">${esc(m.name)}${isSelf?' (you)':''}</div>
+          ${tag}
+        </div>
+        ${action}
+      </div>`;
+    }).join('');
+    teamSection=`
+      <div class="page-head" style="margin-top:30px"><h1 style="font-size:21px">👥 Manage Admins</h1>
+        <p>Promote a member to moderator, or remove the role. Moderators can
+          handle reports and remove content, but can't manage admins.</p></div>
+      <div class="composer">
+        <div class="field" style="margin-bottom:10px">
+          <label>Make someone a moderator</label>
+          <div style="display:flex;gap:8px">
+            <input id="promoteName" placeholder="Exact display name" style="flex:1">
+            <button class="btn btn-rust" onclick="promoteMember()">Add</button>
+          </div>
+          <span class="hint">They must already have an account on the board.</span>
+        </div>
+      </div>
+      <div class="team-list">${rows||'<div class="empty">No admins yet.</div>'}</div>`;
+  }
+
+  // ---- verify a member: lead admin only; three badge types ----
+  let verifySection='';
+  if(STATE.user.isSuperAdmin){
+    verifySection=`
+    <div class="page-head" style="margin-top:30px"><h1 style="font-size:21px">Verification Badges</h1>
+      <p>Grant a member one of three badges. Only you (lead admin) can do this.</p></div>
+    <div class="composer">
+      <div class="field">
+        <label>Member's display name</label>
+        <input id="verifyName" placeholder="Exact display name" style="width:100%">
+        <span class="hint">They must already have an account on the board.</span>
+      </div>
+      <div class="field" style="margin-bottom:8px">
+        <label>Badge</label>
+        <select id="verifyBadge" class="sel" style="width:100%">
+          <option value="verified">✓ Verified — a confirmed, genuine person</option>
+          <option value="local">📍 Local — confirmed they live in the area</option>
+          <option value="official">★ Official — a recognised authority or business</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-rust" onclick="verifyMember(true)">Grant badge</button>
+        <button class="btn btn-ghost" onclick="verifyMember(false)">Remove badge</button>
+      </div>
+      <p class="hint" style="margin-top:12px;line-height:1.5">
+        ⚠️ Grant the <b>★ Official</b> badge sparingly — it tells the whole
+        community to trust this person as an authority. Only give it after
+        real checking (a council email, a registered business, etc.). A badge
+        is only as trustworthy as the verification behind it.</p>
+    </div>`;
+  }
+
+  app.innerHTML=`
+    <div class="crumbs"><span onclick="go('home')">Home</span> › Moderation</div>
+    <div class="page-head"><h1>🛡 Moderation</h1>
+      <p>${data.reports.length} open report${data.reports.length!==1?'s':''} ·
+        removed content is hidden from everyone but can be restored</p></div>
+    ${data.reports.length?cards
+      :`<div class="empty">No open reports. The board is clear. 🎉</div>`}
+    ${verifySection}
+    ${teamSection}`;
+}
+
+/* lead admin: grant or remove one of the three verification badges */
+async function verifyMember(on){
+  const name=document.getElementById('verifyName').value.trim();
+  const badge=document.getElementById('verifyBadge').value;
+  if(!name){ toast('Enter a display name'); return; }
+  const labels={verified:'Verified',local:'Local',official:'Official'};
+  try{
+    await api('/api/admin/verify',{method:'POST',json:{name,badge,on}});
+    toast(on?(name+' now has the '+labels[badge]+' badge')
+            :(name+'\u2019s '+labels[badge]+' badge removed'));
+    document.getElementById('verifyName').value='';
+  }catch(e){ toast(e.message); }
+}
+
+/* super-admin: promote a member to moderator */
+async function promoteMember(){
+  const name=document.getElementById('promoteName').value.trim();
+  if(!name){ toast('Enter a display name'); return; }
+  await setRole(name,'moderator');
+}
+async function setRole(name,role){
+  try{
+    await api('/api/admin/setrole',{method:'POST',json:{name,role}});
+    toast(role==='moderator'?(name+' is now a moderator'):(name+'\u2019s role removed'));
+    renderAdmin();
+  }catch(e){ toast(e.message); }
+}
+async function adminRemove(reportId,targetId,kind){
+  if(!confirm('Remove this '+kind+'? It will be hidden from everyone. You can restore it later.'))return;
+  try{
+    await api('/api/admin/remove',{method:'POST',json:{targetId,kind}});
+    toast('Content removed');
+    renderAdmin();
+  }catch(e){ toast(e.message); }
+}
+async function adminDismiss(reportId){
+  try{
+    await api('/api/admin/dismiss',{method:'POST',json:{reportId}});
+    toast('Report dismissed');
+    renderAdmin();
+  }catch(e){ toast(e.message); }
+}
+
+init();
+</script>
+</body>
+</html>
